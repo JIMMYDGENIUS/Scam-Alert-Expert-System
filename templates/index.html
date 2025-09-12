@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scam Expert System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl md:text-4xl font-bold mb-6 text-center">
+      🚨 Scam Expert System
+    </h1>
+
+    <!-- Form -->
+    <form id="scan-form"
+          class="bg-white rounded-xl shadow-md p-6 space-y-4 max-w-lg mx-auto"
+          method="post" action="/analyze">
+      <label class="block">
+        <span class="text-gray-700 font-medium">Message to Analyze:</span>
+        <textarea name="message"
+                  class="mt-1 block w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+                  rows="5"
+                  placeholder="Paste the email or SMS text here"></textarea>
+      </label>
+
+      <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
+        Analyze
+      </button>
+    </form>
+
+    <!-- Results -->
+    {% if result %}
+    <div class="mt-8 bg-white rounded-xl shadow-md p-6 max-w-lg mx-auto border-l-4 
+                {% if result.tier == 'T0' %}border-green-500
+                {% elif result.tier == 'T1' %}border-yellow-400
+                {% elif result.tier == 'T2' %}border-orange-500
+                {% else %}border-red-600{% endif %}">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Analysis Result</h2>
+
+      <p class="mb-2">
+        <span class="font-semibold">Summary:</span> {{ result.summary }}
+      </p>
+
+      <p class="mb-2">
+        <span class="font-semibold">Tier:</span>
+        <span class="font-bold
+          {% if result.tier == 'T0' %}text-green-600
+          {% elif result.tier == 'T1' %}text-yellow-600
+          {% elif result.tier == 'T2' %}text-orange-600
+          {% else %}text-red-600{% endif %}">
+          {{ result.tier }}
+        </span>
+      </p>
+
+      <p class="mb-2">
+        <span class="font-semibold">Score:</span>
+        <span class="font-bold">{{ result.score }}</span>
+      </p>
+
+      <div class="mb-2">
+        <span class="font-semibold">Recommended Actions:</span>
+        <ul class="list-disc list-inside mt-1 space-y-1">
+          {% for action in result.actions %}
+            <li class="text-gray-700">{{ action }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <p class="mb-2">
+        <span class="font-semibold">Rule Hits:</span> {{ result.hits|length }}
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+text,display_domain,final_domain,sender_domain_age_days,reports_last_90d,global_blacklist,label
+URGENT: send your OTP within 5 minutes and keep this confidential.,support.paypai.com,support.paypal.com,12,4,False,scam
+"Hi, your package will be delivered today. Track here: https://logistics.example.com",logistics.example.com,logistics.example.com,420,0,False,legit
+Please send the seed phrase to verify your wallet recovery.,wallet-help.io,wallet-help.io,20,2,False,scam
+Meeting moved to 2pm. No action required.,,,3000,0,False,legit
+Buy Apple gift card and send codes to this number. Keep this between us.,,,5,5,True,scam

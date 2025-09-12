@@ -1,0 +1,13 @@
+{
+  "text": "URGENT: send your OTP within 5 minutes and keep this confidential.",
+  "display_domain": "support.paypai.com",
+  "final_domain": "support.paypal.com",
+  "channel": "sms",
+  "sender": {
+    "domain_age_days": 12
+  },
+  "reputation": {
+    "reports_last_90d": 4,
+    "global_blacklist": false
+  }
+}

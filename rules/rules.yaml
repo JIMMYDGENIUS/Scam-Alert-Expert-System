@@ -1,0 +1,131 @@
+# ==========================================================
+# Scam Expert System Rule Base
+# Groups: Bank Fraud, Crypto Scam, Job Scam, Lottery Scam, Phishing
+# ==========================================================
+
+# -------------------------------
+# 🔹 Bank Fraud / OTP / PIN Theft
+# -------------------------------
+- id: R001
+  description: Requests OTP, PIN, or seed phrase
+  conditions:
+    any:
+      - text.contains_any: ["OTP", "PIN", "one-time password", "seed phrase", "recovery phrase", "private key"]
+      - text.regex: "(?i)(send|enter).*?(otp|pin|code|seed|phrase|private\\s*key)"
+  weight: 45
+  mitigations: ["warn_user", "block_if_repeated"]
+  evidence: ["matched_terms"]
+
+- id: R002
+  description: Account suspension threats
+  conditions:
+    any:
+      - text.contains_any: ["account suspended", "account blocked", "account locked", "deactivated"]
+  weight: 25
+
+# -------------------------------
+# 🔹 Crypto Investment / Wallet Fraud
+# -------------------------------
+- id: R010
+  description: Crypto wallet / payment request
+  conditions:
+    any:
+      - text.contains_any: ["wallet address", "bitcoin address", "usdt", "ethereum", "crypto transfer"]
+      - text.regex: "(?i)(btc|eth|usdt)\\s*(address|wallet)"
+  weight: 40
+
+- id: R011
+  description: Unrealistic crypto investment promises
+  conditions:
+    any:
+      - text.contains_any: ["double your money", "200% profit", "guaranteed returns", "risk-free investment"]
+  weight: 30
+
+# -------------------------------
+# 🔹 Fake Job Offers / Employment Scam
+# -------------------------------
+- id: R020
+  description: Fake job offer requiring payment
+  conditions:
+    all:
+      - text.contains_any: ["job offer", "congratulations", "selected for a job", "employment opportunity"]
+      - text.contains_any: ["processing fee", "registration fee", "training fee", "pay to apply"]
+  weight: 35
+
+- id: R021
+  description: Work-from-home too good to be true
+  conditions:
+    any:
+      - text.contains_any: ["earn $500 daily", "work from home", "easy money", "instant income"]
+  weight: 28
+
+# -------------------------------
+# 🔹 Lottery / Prize Scam
+# -------------------------------
+- id: R030
+  description: Lottery or prize winnings
+  conditions:
+    any:
+      - text.contains_any: ["lottery winner", "you have won", "claim your prize", "jackpot"]
+  weight: 32
+
+- id: R031
+  description: Prize claim requiring payment
+  conditions:
+    all:
+      - text.contains_any: ["won", "prize", "reward", "congratulations"]
+      - text.contains_any: ["bank details", "delivery charge", "processing fee"]
+  weight: 38
+
+# -------------------------------
+# 🔹 Phishing / Fake Links
+# -------------------------------
+- id: R040
+  description: Suspicious URLs or look-alike domains
+  conditions:
+    any:
+      - url.display_domain_neq_final: true
+      - url.lookalike_threshold: 0.8
+  weight: 35
+  evidence: ["display_domain", "final_domain", "lookalike_score"]
+
+- id: R041
+  description: Fake login pages
+  conditions:
+    any:
+      - text.contains_any: ["verify your account", "login immediately", "secure your email"]
+      - text.regex: "(?i)http[s]?://[a-z0-9.-]+(support|security|verify|account)[^\\s]*"
+  weight: 40
+
+# -------------------------------
+# 🔹 Urgency & Secrecy Red Flags
+# -------------------------------
+- id: R050
+  description: Urgency + secrecy combo
+  conditions:
+    all:
+      - text.contains_any: ["urgent", "immediately", "within 10 minutes", "final warning"]
+      - text.contains_any: ["don't tell", "confidential", "keep this between us"]
+  weight: 30
+
+# -------------------------------
+# 🔹 Blacklist / Reputation
+# -------------------------------
+- id: R060
+  description: Sender is blacklisted or flagged
+  conditions:
+    any:
+      - reputation.reports_last_90d_gte: 3
+      - reputation.global_blacklist: true
+  weight: 50
+
+# -------------------------------
+# 🔹 Hard-Stop Example (Confirmed Fraud)
+# -------------------------------
+# - id: R999
+#   description: Confirmed fraud source
+#   conditions:
+#     all:
+#       - sender.confirmed_fraud: true
+#   weight: 100
+#   hard_stop: true

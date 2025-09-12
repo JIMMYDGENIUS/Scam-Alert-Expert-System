@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic==2.8.2
+numpy
+pandas
+scikit-learn
+python-dateutil
+tldextract
+PyYAML
+textdistance
