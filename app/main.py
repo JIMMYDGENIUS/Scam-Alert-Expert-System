@@ -27,11 +27,10 @@ ALPHA = float(os.getenv("BLEND_ALPHA", "0.7"))  # expert weight
 app = FastAPI(title="Scam Expert System", version="1.0.0")
 
 # Mount /static for optional images/js/css
-app.mount(
-    "/static",
-    StaticFiles(directory=Path(__file__).parent.parent / "static"),
-    name="static",
-)
+#app.mount(
+#    "/static",
+#    name="static",
+#)
 
 # ------------------------------------------------------------------
 #  Templates
