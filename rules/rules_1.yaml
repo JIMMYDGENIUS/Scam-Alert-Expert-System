@@ -1,5 +1,5 @@
 # ==========================================================
-# Scam Expert System Rule Base  (v1.1)
+# Scam Expert System Rule Base  (v1.2)
 # ==========================================================
 definitions:
   urgent_words: &urgent
@@ -18,7 +18,7 @@ rules:
   - id: R001
     category: "Bank Fraud"
     severity: "high"
-    version: 1.1
+    version: 1.2
     description: Requests OTP, PIN, or seed/verification codes
     conditions:
       any:
@@ -31,7 +31,7 @@ rules:
   - id: R002
     category: "Bank Fraud"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Account suspension or locking threats
     conditions:
       any:
@@ -44,7 +44,7 @@ rules:
   - id: R010
     category: "Crypto Scam"
     severity: "high"
-    version: 1.1
+    version: 1.2
     description: Crypto wallet / payment request
     conditions:
       any:
@@ -56,7 +56,7 @@ rules:
   - id: R011
     category: "Crypto Scam"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Unrealistic crypto investment promises
     conditions:
       any:
@@ -70,7 +70,7 @@ rules:
   - id: R020
     category: "Job Scam"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Fake job offer requiring payment
     conditions:
       all:
@@ -83,7 +83,7 @@ rules:
   - id: R021
     category: "Job Scam"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Work-from-home or instant-income claims
     conditions:
       any:
@@ -97,7 +97,7 @@ rules:
   - id: R030
     category: "Lottery Scam"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Lottery or prize winnings
     conditions:
       any:
@@ -107,7 +107,7 @@ rules:
   - id: R031
     category: "Lottery Scam"
     severity: "high"
-    version: 1.1
+    version: 1.2
     description: Prize claim requiring payment or bank details
     conditions:
       all:
@@ -121,30 +121,30 @@ rules:
   - id: R040
     category: "Phishing"
     severity: "high"
-    version: 1.1
+    version: 1.2
     description: Suspicious URLs or look-alike domains
     conditions:
       any:
         - url.display_domain_neq_final: true
         - url.lookalike_threshold: 0.8
-    weight: 40
+    weight: 50   # ⬆ raised from 40
     evidence: ["display_domain", "final_domain", "lookalike_score"]
 
   - id: R041
     category: "Phishing"
     severity: "high"
-    version: 1.1
+    version: 1.2
     description: Fake login or verification pages
     conditions:
       any:
         - text.contains_any: ["verify your account", "login immediately", "secure your email"]
         - text.regex: "(?i)http[s]?://[a-z0-9.-]+(support|security|verify|account)[^\\s]*"
-    weight: 45
+    weight: 55   # ⬆ raised from 45
 
   - id: R042
     category: "Phishing"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Use of URL shorteners often abused by scammers
     conditions:
       any:
@@ -154,12 +154,23 @@ rules:
   - id: R043
     category: "Phishing"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Suspicious top-level domain (TLD)
     conditions:
       any:
         - text.regex: "(?i)\\.[xX][yY][zZ]|\\.[tT][oO][pP]|\\.[cC][nN]"
     weight: 25
+
+  - id: R044
+    category: "Phishing"
+    severity: "medium"
+    version: 1.2
+    description: Password expiry phishing with link
+    conditions:
+      all:
+        - text.contains_any: ["password expire", "password will expire", "account expire"]
+        - text.regex: "(?i)http[s]?://"
+    weight: 35   # ensures T1 for expiry + link combos
 
   # -------------------------------
   # 🔹 Urgency & Secrecy Red Flags
@@ -167,7 +178,7 @@ rules:
   - id: R050
     category: "Social Engineering"
     severity: "medium"
-    version: 1.1
+    version: 1.2
     description: Urgency + secrecy combo
     conditions:
       all:
@@ -181,7 +192,7 @@ rules:
   - id: R060
     category: "Reputation"
     severity: "critical"
-    version: 1.1
+    version: 1.2
     description: Sender is blacklisted or has many recent reports
     conditions:
       any:
@@ -196,7 +207,7 @@ rules:
   - id: R999
     category: "Confirmed Fraud"
     severity: "critical"
-    version: 1.1
+    version: 1.2
     description: Known confirmed fraud source
     conditions:
       all:

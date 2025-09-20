@@ -1,131 +1,216 @@
 # ==========================================================
-# Scam Expert System Rule Base
-# Groups: Bank Fraud, Crypto Scam, Job Scam, Lottery Scam, Phishing
+# Scam Expert System Rule Base  (v1.2)
 # ==========================================================
+definitions:
+  urgent_words: &urgent
+    ["urgent", "immediately", "within 10 minutes", "within 5 minutes", "final warning"]
+  secrecy_words: &secret
+    ["don't tell", "confidential", "keep this between us"]
+  otp_words: &otp
+    ["otp", "one time password", "one-time password", "two-factor code",
+     "verification code", "pin", "pin code", "security code", "auth code",
+     "seed phrase", "recovery phrase", "private key"]
 
-# -------------------------------
-# 🔹 Bank Fraud / OTP / PIN Theft
-# -------------------------------
-- id: R001
-  description: Requests OTP, PIN, or seed phrase
-  conditions:
-    any:
-      - text.contains_any: ["OTP", "PIN", "one-time password", "seed phrase", "recovery phrase", "private key"]
-      - text.regex: "(?i)(send|enter).*?(otp|pin|code|seed|phrase|private\\s*key)"
-  weight: 45
-  mitigations: ["warn_user", "block_if_repeated"]
-  evidence: ["matched_terms"]
+rules:
+  # -------------------------------
+  # 🔹 Bank Fraud / OTP / PIN Theft
+  # -------------------------------
+  - id: R001
+    category: "Bank Fraud"
+    severity: "high"
+    version: 1.2
+    description: Requests OTP, PIN, or seed/verification codes
+    conditions:
+      any:
+        - text.contains_any: *otp
+        - text.regex: "(?i)(send|enter|provide|share).*?(otp|pin|code|seed|phrase|private\\s*key)"
+    weight: 50
+    mitigations: ["warn_user", "block_if_repeated"]
+    evidence: ["matched_terms"]
 
-- id: R002
-  description: Account suspension threats
-  conditions:
-    any:
-      - text.contains_any: ["account suspended", "account blocked", "account locked", "deactivated"]
-  weight: 25
+  - id: R002
+    category: "Bank Fraud"
+    severity: "medium"
+    version: 1.2
+    description: Account suspension or locking threats
+    conditions:
+      any:
+        - text.contains_any: ["account suspended", "account blocked", "account locked", "deactivated"]
+    weight: 30
 
-# -------------------------------
-# 🔹 Crypto Investment / Wallet Fraud
-# -------------------------------
-- id: R010
-  description: Crypto wallet / payment request
-  conditions:
-    any:
-      - text.contains_any: ["wallet address", "bitcoin address", "usdt", "ethereum", "crypto transfer"]
-      - text.regex: "(?i)(btc|eth|usdt)\\s*(address|wallet)"
-  weight: 40
+  # -------------------------------
+  # 🔹 Crypto Investment / Wallet Fraud
+  # -------------------------------
+  - id: R010
+    category: "Crypto Scam"
+    severity: "high"
+    version: 1.2
+    description: Crypto wallet / payment request
+    conditions:
+      any:
+        - text.contains_any: ["wallet address", "bitcoin address", "usdt", "ethereum",
+                              "crypto transfer", "bnb", "doge", "airdrop", "staking reward"]
+        - text.regex: "(?i)(btc|eth|usdt|bnb|doge)\\s*(address|wallet)"
+    weight: 45
 
-- id: R011
-  description: Unrealistic crypto investment promises
-  conditions:
-    any:
-      - text.contains_any: ["double your money", "200% profit", "guaranteed returns", "risk-free investment"]
-  weight: 30
+  - id: R011
+    category: "Crypto Scam"
+    severity: "medium"
+    version: 1.2
+    description: Unrealistic crypto investment promises
+    conditions:
+      any:
+        - text.contains_any: ["double your money", "200% profit", "guaranteed returns",
+                              "risk-free investment", "instant millionaire"]
+    weight: 35
 
-# -------------------------------
-# 🔹 Fake Job Offers / Employment Scam
-# -------------------------------
-- id: R020
-  description: Fake job offer requiring payment
-  conditions:
-    all:
-      - text.contains_any: ["job offer", "congratulations", "selected for a job", "employment opportunity"]
-      - text.contains_any: ["processing fee", "registration fee", "training fee", "pay to apply"]
-  weight: 35
+  # -------------------------------
+  # 🔹 Fake Job Offers / Employment Scam
+  # -------------------------------
+  - id: R020
+    category: "Job Scam"
+    severity: "medium"
+    version: 1.2
+    description: Fake job offer requiring payment
+    conditions:
+      all:
+        - text.contains_any: ["job offer", "congratulations", "selected for a job",
+                              "employment opportunity"]
+        - text.contains_any: ["processing fee", "registration fee", "training fee",
+                              "pay to apply"]
+    weight: 40
 
-- id: R021
-  description: Work-from-home too good to be true
-  conditions:
-    any:
-      - text.contains_any: ["earn $500 daily", "work from home", "easy money", "instant income"]
-  weight: 28
+  - id: R021
+    category: "Job Scam"
+    severity: "medium"
+    version: 1.2
+    description: Work-from-home or instant-income claims
+    conditions:
+      any:
+        - text.contains_any: ["earn $500 daily", "work from home", "easy money",
+                              "instant income", "no experience needed"]
+    weight: 30
 
-# -------------------------------
-# 🔹 Lottery / Prize Scam
-# -------------------------------
-- id: R030
-  description: Lottery or prize winnings
-  conditions:
-    any:
-      - text.contains_any: ["lottery winner", "you have won", "claim your prize", "jackpot"]
-  weight: 32
+  # -------------------------------
+  # 🔹 Lottery / Prize Scam
+  # -------------------------------
+  - id: R030
+    category: "Lottery Scam"
+    severity: "medium"
+    version: 1.2
+    description: Lottery or prize winnings
+    conditions:
+      any:
+        - text.contains_any: ["lottery winner", "you have won", "claim your prize", "jackpot"]
+    weight: 35
 
-- id: R031
-  description: Prize claim requiring payment
-  conditions:
-    all:
-      - text.contains_any: ["won", "prize", "reward", "congratulations"]
-      - text.contains_any: ["bank details", "delivery charge", "processing fee"]
-  weight: 38
+  - id: R031
+    category: "Lottery Scam"
+    severity: "high"
+    version: 1.2
+    description: Prize claim requiring payment or bank details
+    conditions:
+      all:
+        - text.contains_any: ["won", "prize", "reward", "congratulations"]
+        - text.contains_any: ["bank details", "delivery charge", "processing fee", "service fee"]
+    weight: 42
 
-# -------------------------------
-# 🔹 Phishing / Fake Links
-# -------------------------------
-- id: R040
-  description: Suspicious URLs or look-alike domains
-  conditions:
-    any:
-      - url.display_domain_neq_final: true
-      - url.lookalike_threshold: 0.8
-  weight: 35
-  evidence: ["display_domain", "final_domain", "lookalike_score"]
+  # -------------------------------
+  # 🔹 Phishing / Fake Links
+  # -------------------------------
+  - id: R040
+    category: "Phishing"
+    severity: "high"
+    version: 1.2
+    description: Suspicious URLs or look-alike domains
+    conditions:
+      any:
+        - url.display_domain_neq_final: true
+        - url.lookalike_threshold: 0.8
+    weight: 50   # ⬆ raised from 40
+    evidence: ["display_domain", "final_domain", "lookalike_score"]
 
-- id: R041
-  description: Fake login pages
-  conditions:
-    any:
-      - text.contains_any: ["verify your account", "login immediately", "secure your email"]
-      - text.regex: "(?i)http[s]?://[a-z0-9.-]+(support|security|verify|account)[^\\s]*"
-  weight: 40
+  - id: R041
+    category: "Phishing"
+    severity: "high"
+    version: 1.2
+    description: Fake login or verification pages
+    conditions:
+      any:
+        - text.contains_any: ["verify your account", "login immediately", "secure your email"]
+        - text.regex: "(?i)http[s]?://[a-z0-9.-]+(support|security|verify|account)[^\\s]*"
+    weight: 55   # ⬆ raised from 45
 
-# -------------------------------
-# 🔹 Urgency & Secrecy Red Flags
-# -------------------------------
-- id: R050
-  description: Urgency + secrecy combo
-  conditions:
-    all:
-      - text.contains_any: ["urgent", "immediately", "within 10 minutes", "final warning"]
-      - text.contains_any: ["don't tell", "confidential", "keep this between us"]
-  weight: 30
+  - id: R042
+    category: "Phishing"
+    severity: "medium"
+    version: 1.2
+    description: Use of URL shorteners often abused by scammers
+    conditions:
+      any:
+        - text.regex: "(?i)(bit\\.ly|tinyurl|t\\.co|goo\\.gl|is\\.gd|shorte\\.st)"
+    weight: 25
 
-# -------------------------------
-# 🔹 Blacklist / Reputation
-# -------------------------------
-- id: R060
-  description: Sender is blacklisted or flagged
-  conditions:
-    any:
-      - reputation.reports_last_90d_gte: 3
-      - reputation.global_blacklist: true
-  weight: 50
+  - id: R043
+    category: "Phishing"
+    severity: "medium"
+    version: 1.2
+    description: Suspicious top-level domain (TLD)
+    conditions:
+      any:
+        - text.regex: "(?i)\\.[xX][yY][zZ]|\\.[tT][oO][pP]|\\.[cC][nN]"
+    weight: 25
 
-# -------------------------------
-# 🔹 Hard-Stop Example (Confirmed Fraud)
-# -------------------------------
-# - id: R999
-#   description: Confirmed fraud source
-#   conditions:
-#     all:
-#       - sender.confirmed_fraud: true
-#   weight: 100
-#   hard_stop: true
+  - id: R044
+    category: "Phishing"
+    severity: "medium"
+    version: 1.2
+    description: Password expiry phishing with link
+    conditions:
+      all:
+        - text.contains_any: ["password expire", "password will expire", "account expire"]
+        - text.regex: "(?i)http[s]?://"
+    weight: 35   # ensures T1 for expiry + link combos
+
+  # -------------------------------
+  # 🔹 Urgency & Secrecy Red Flags
+  # -------------------------------
+  - id: R050
+    category: "Social Engineering"
+    severity: "medium"
+    version: 1.2
+    description: Urgency + secrecy combo
+    conditions:
+      all:
+        - text.contains_any: *urgent
+        - text.contains_any: *secret
+    weight: 35
+
+  # -------------------------------
+  # 🔹 Blacklist / Reputation
+  # -------------------------------
+  - id: R060
+    category: "Reputation"
+    severity: "critical"
+    version: 1.2
+    description: Sender is blacklisted or has many recent reports
+    conditions:
+      any:
+        - reputation.reports_last_90d_gte: 3
+        - reputation.global_blacklist: true
+    weight: 70
+    hard_stop: true
+
+  # -------------------------------
+  # 🔹 Hard-Stop Examples
+  # -------------------------------
+  - id: R999
+    category: "Confirmed Fraud"
+    severity: "critical"
+    version: 1.2
+    description: Known confirmed fraud source
+    conditions:
+      all:
+        - sender.confirmed_mule: true
+    weight: 100
+    hard_stop: true
